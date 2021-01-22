@@ -8,7 +8,7 @@
     "@ledgerhq/errors": "^5.26.0",
     "@ledgerhq/hw-transport": "^5.26.0",
     "bignumber.js": "^9.0.1",
-    "@vaporyjs/rlp": "2.2.0"
+    "@vaporyjs/rlp": "2.0   .0"
   },
   "deprecated": false,
   "description": "Ledger Hardware Wallet Vapory Application API",

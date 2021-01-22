@@ -21,7 +21,7 @@ import { splitPath, foreach } from "./utils";
 import { VapAppPleaseEnableContractData } from "@ledgerhq/errors";
 import type Transport from "@ledgerhq/hw-transport";
 import { BigNumber } from "bignumber.js";
-import { encode, decode } from "rlp";
+import { encode, decode } from "@vaporyjs/rlp";
 
 function hexBuffer(str: string): Buffer {
   return Buffer.from(str.startsWith("0x") ? str.slice(2) : str, "hex");
