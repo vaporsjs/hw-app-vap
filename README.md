@@ -3,9 +3,9 @@
 [Github](https://github.com/LedgerHQ/ledgerjs/),
 [Ledger Devs Slack](https://ledger-dev.slack.com/)
 
-## @ledgerhq/hw-app-eth
+## @ledgerhq/hw-app-vap
 
-Ledger Hardware Wallet ETH JavaScript bindings.
+Ledger Hardware Wallet VAP JavaScript bindings.
 
 ## API
 
@@ -16,7 +16,7 @@ Ledger Hardware Wallet ETH JavaScript bindings.
 -   [byContractAddress](#bycontractaddress)
     -   [Parameters](#parameters)
 -   [list](#list)
--   [Eth](#eth)
+-   [Vap](#vap)
     -   [Parameters](#parameters-1)
     -   [Examples](#examples)
     -   [getAddress](#getaddress)
@@ -60,9 +60,9 @@ list all the ERC20 tokens informations
 
 Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;TokenInfo>** 
 
-### Eth
+### Vap
 
-Ethereum API
+Vapory API
 
 #### Parameters
 
@@ -72,13 +72,13 @@ Ethereum API
 #### Examples
 
 ```javascript
-import Eth from "@ledgerhq/hw-app-eth";
-const eth = new Eth(transport)
+import Vap from "@ledgerhq/hw-app-vap";
+const vap = new Vap(transport)
 ```
 
 #### getAddress
 
-get Ethereum address for a given BIP 32 path.
+get Vapory address for a given BIP 32 path.
 
 ##### Parameters
 
@@ -89,7 +89,7 @@ get Ethereum address for a given BIP 32 path.
 ##### Examples
 
 ```javascript
-eth.getAddress("44'/60'/0'/0/0").then(o => o.address)
+vap.getAddress("44'/60'/0'/0/0").then(o => o.address)
 ```
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{publicKey: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), address: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), chainCode: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?}>** an object with a publicKey, address and (optionally) chainCode
@@ -110,10 +110,10 @@ calling this contract address to display the proper token information to the use
 ##### Examples
 
 ```javascript
-import { byContractAddress } from "@ledgerhq/hw-app-eth/erc20"
+import { byContractAddress } from "@ledgerhq/hw-app-vap/erc20"
 const zrxInfo = byContractAddress("0xe41d2489571d322189246dafa5ebde1f4699f498")
-if (zrxInfo) await appEth.provideERC20TokenInformation(zrxInfo)
-const signed = await appEth.signTransaction(path, rawTxHex)
+if (zrxInfo) await appVap.provideERC20TokenInformation(zrxInfo)
+const signed = await appVap.signTransaction(path, rawTxHex)
 ```
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** 
@@ -130,7 +130,7 @@ You can sign a transaction and retrieve v, r, s given the raw transaction and th
 ##### Examples
 
 ```javascript
-eth.signTransaction("44'/60'/0'/0/0", "e8018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a2487400080").then(result => ...)
+vap.signTransaction("44'/60'/0'/0/0", "e8018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a2487400080").then(result => ...)
 ```
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{s: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), v: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), r: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** 
@@ -141,7 +141,7 @@ Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 
 #### signPersonalMessage
 
-You can sign a message according to eth_sign RPC call and retrieve v, r, s given the message and the BIP 32 path of the account to sign.
+You can sign a message according to vap_sign RPC call and retrieve v, r, s given the message and the BIP 32 path of the account to sign.
 
 ##### Parameters
 
@@ -151,7 +151,7 @@ You can sign a message according to eth_sign RPC call and retrieve v, r, s given
 ##### Examples
 
 ```javascript
-eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).then(result => {
+vap.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).then(result => {
 var v = result['v'] - 27;
 v = v.toString(16);
 if (v.length < 2) {
@@ -165,7 +165,7 @@ Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 
 #### signEIP712HashedMessage
 
-Sign a prepared message following web3.eth.signTypedData specification. The host computes the domain separator and hashStruct(message)
+Sign a prepared message following web3.vap.signTypedData specification. The host computes the domain separator and hashStruct(message)
 
 ##### Parameters
 
@@ -176,7 +176,7 @@ Sign a prepared message following web3.eth.signTypedData specification. The host
 ##### Examples
 
 ```javascript
-eth.signEIP712HashedMessage("44'/60'/0'/0/0", Buffer.from("0101010101010101010101010101010101010101010101010101010101010101").toString("hex"), Buffer.from("0202020202020202020202020202020202020202020202020202020202020202").toString("hex")).then(result => {
+vap.signEIP712HashedMessage("44'/60'/0'/0/0", Buffer.from("0101010101010101010101010101010101010101010101010101010101010101").toString("hex"), Buffer.from("0202020202020202020202020202020202020202020202020202020202020202").toString("hex")).then(result => {
 var v = result['v'] - 27;
 v = v.toString(16);
 if (v.length < 2) {
@@ -245,7 +245,7 @@ It shall be run following a provideERC20TokenInformation call for the given cont
 
 ##### Parameters
 
--   `operationContract` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** contract address of the token to be transferred (not present for ETH)
+-   `operationContract` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** contract address of the token to be transferred (not present for VAP)
 -   `operationQuantization` **BigNumber** quantization used for the token to be transferred
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** 

@@ -2,7 +2,7 @@ import {
   createTransportReplayer,
   RecordStore
 } from "@ledgerhq/hw-transport-mocker";
-import Eth from "../src/Eth";
+import Vap from "../src/Vap";
 import { BigNumber } from "bignumber.js";
 import { byContractAddress } from "../src/erc20"
 
@@ -14,8 +14,8 @@ test("getAppConfiguration", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
-  const result = await eth.getAppConfiguration();
+  const vap = new Vap(transport);
+  const result = await vap.getAppConfiguration();
   expect(result).toEqual({ arbitraryDataEnabled: 1, erc20ProvisioningNecessary: 0, starkEnabled: 0, version: "1.1.6" });
 });
 
@@ -27,8 +27,8 @@ test("getAddress", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
-  const result = await eth.getAddress("44'/60'/0'/0'/0");
+  const vap = new Vap(transport);
+  const result = await vap.getAddress("44'/60'/0'/0'/0");
   expect(result).toEqual({
     address: "0xCbA98362e199c41E1864D0923AF9646d3A648451",
     publicKey:
@@ -44,8 +44,8 @@ test("signTransaction", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
-  const result = await eth.signTransaction(
+  const vap = new Vap(transport);
+  const result = await vap.signTransaction(
     "44'/60'/0'/0'/0",
     "e8018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a2487400080"
   );
@@ -70,8 +70,8 @@ test("signTransactionChunkedLimit", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
-  const result = await eth.signTransaction(
+  const vap = new Vap(transport);
+  const result = await vap.signTransaction(
     "44'/60'/0'/0/0",
     "f901ad8205448505c205da808310c8e19402b3f51ac9202aa19be63d61a8c681579d6e3a5180b90184293491160000000000000000000000000000000000000000000000000000000005ee832e0000000000000000000000000000000000000000000000000000000005eeb9ac000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000505846a0a89dd26fa5cd0677fd5406039c218620000000000000000000000000000000000000000000000000000000001f969fc88a4d19062c1525d6ca664dee285aa573c06e0f8bdd4971032d2b63be6183d05300000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000041c4c3f1f8711741f2180d850a09a2933bb21dff1c79caf8c45ecda957836ec7e60d78661c28ad96713e5f22a458376422599bd3776d9aeafc02e319ed0c1b41e51c00000000000000000000000000000000000000000000000000000000000000018080"
   );
@@ -90,8 +90,8 @@ test("signPersonalMessage", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
-  const result = await eth.signPersonalMessage(
+  const vap = new Vap(transport);
+  const result = await vap.signPersonalMessage(
     "44'/60'/0'/0'/0",
     Buffer.from("test").toString("hex")
   );
@@ -110,8 +110,8 @@ test("signEIP712HashedMessage", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
-  const result = await eth.signEIP712HashedMessage(
+  const vap = new Vap(transport);
+  const result = await vap.signEIP712HashedMessage(
     "44'/60'/0'/0'/0",
     Buffer.from("c24f499b8c957196651b13edd64aaccc3980009674b2aea0966c8a56ba81278e", "hex").toString("hex"),
     Buffer.from("9d96be8a7cca396e711a3ba356bd9878df02a726d753ddb6cda3c507d888bc77", "hex").toString("hex")
@@ -131,9 +131,9 @@ test("provideERC20TokenInformation", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
+  const vap = new Vap(transport);
   const zrxInfo = byContractAddress("0xe41d2489571d322189246dafa5ebde1f4699f498");
-  const result = await eth.provideERC20TokenInformation(zrxInfo);
+  const result = await vap.provideERC20TokenInformation(zrxInfo);
   expect(result).toEqual(true);
 });
 
@@ -147,10 +147,10 @@ test("signAllowance", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
+  const vap = new Vap(transport);
   const tokenInfo = byContractAddress("0xdac17f958d2ee523a2206206994597c13d831ec7");
-  await eth.provideERC20TokenInformation(tokenInfo);  
-  const result = await eth.signTransaction(
+  await vap.provideERC20TokenInformation(tokenInfo);  
+  const result = await vap.signTransaction(
     "44'/60'/0'/0/0",
     "f86d018504e3b2920082520894dac17f958d2ee523a2206206994597c13d831ec7872bd72a24874000b844095ea7b30000000000000000000000000102030405060708090a0b0c0d0e0f101112131400000000000000000000000000000000000000000000000000000000000186a0"
   );
@@ -171,10 +171,10 @@ test("signAllowanceUnlimited", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
+  const vap = new Vap(transport);
   const tokenInfo = byContractAddress("0xdac17f958d2ee523a2206206994597c13d831ec7");
-  await eth.provideERC20TokenInformation(tokenInfo);  
-  const result = await eth.signTransaction(
+  await vap.provideERC20TokenInformation(tokenInfo);  
+  const result = await vap.signTransaction(
     "44'/60'/0'/0/0",
     "f86d018504e3b2920082520894dac17f958d2ee523a2206206994597c13d831ec7872bd72a24874000b844095ea7b30000000000000000000000000102030405060708090a0b0c0d0e0f1011121314ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
   );
@@ -193,12 +193,12 @@ test("starkGetPublicKey", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
-  const result = await eth.starkGetPublicKey("21323'/0");
+  const vap = new Vap(transport);
+  const result = await vap.starkGetPublicKey("21323'/0");
   expect(result).toEqual(Buffer.from("05e8330615774c27af37530e34aa17e279eb1ac8ac91709932e0a1929bba54ac", "hex"));
 });
 
-test("starkSignOrderEth", async () => {
+test("starkSignOrderVap", async () => {
   const Transport = createTransportReplayer(
     RecordStore.fromString(`
     => f004010091028000534b000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000010000000100000000000186a00000000000030d4000000d6a00001618
@@ -206,8 +206,8 @@ test("starkSignOrderEth", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
-  const result = await eth.starkSignOrder("21323'/0", null, new BigNumber(1), null, new BigNumber(1), 1, 1, new BigNumber(100000), new BigNumber(200000), 3434, 5656);
+  const vap = new Vap(transport);
+  const result = await vap.starkSignOrder("21323'/0", null, new BigNumber(1), null, new BigNumber(1), 1, 1, new BigNumber(100000), new BigNumber(200000), 3434, 5656);
   expect(result).toEqual({
     r: "029526c310368e835a2a0ee412a3bf084e0f94d91b8265f88a0bee32488223c4",
     s: "012c34bef05a7b80ba22b0d58a18acd1a8198ee8fc9b525f85d2f4f843c5510f",
@@ -226,12 +226,12 @@ test("starkSignOrderTokens", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
+  const vap = new Vap(transport);
   const tokenInfo1 = byContractAddress("0xe41d2489571d322189246dafa5ebde1f4699f498");
-  await eth.provideERC20TokenInformation(tokenInfo1);
+  await vap.provideERC20TokenInformation(tokenInfo1);
   const tokenInfo2 = byContractAddress("0xdac17f958d2ee523a2206206994597c13d831ec7");
-  await eth.provideERC20TokenInformation(tokenInfo2);
-  const result = await eth.starkSignOrder("21323'/0", "e41d2489571d322189246dafa5ebde1f4699f498", new BigNumber(1), "dac17f958d2ee523a2206206994597c13d831ec7", new BigNumber(1), 1, 1, new BigNumber(100000), new BigNumber(200000), 3434, 5656);
+  await vap.provideERC20TokenInformation(tokenInfo2);
+  const result = await vap.starkSignOrder("21323'/0", "e41d2489571d322189246dafa5ebde1f4699f498", new BigNumber(1), "dac17f958d2ee523a2206206994597c13d831ec7", new BigNumber(1), 1, 1, new BigNumber(100000), new BigNumber(200000), 3434, 5656);
   expect(result).toEqual({
     r: "03c4a1aef46539c90eaad9a71eee8319586e2b749793335060a2431c42d0d489",
     s: "01faac9386aaaf9d8d2cc3229aecf9e202f4b83f63e3fff7426ca07725d10fb2",
@@ -246,8 +246,8 @@ test("starkSignTransfer1", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
-  const result = await eth.starkSignTransfer("21323'/0", null, new BigNumber(1), "f1f789e47bb134082b2e901f779a0d188af7fbd7d97d10a9e121f22adadb5b05", 1, 1, new BigNumber(100000), 3434, 5656);
+  const vap = new Vap(transport);
+  const result = await vap.starkSignTransfer("21323'/0", null, new BigNumber(1), "f1f789e47bb134082b2e901f779a0d188af7fbd7d97d10a9e121f22adadb5b05", 1, 1, new BigNumber(100000), 3434, 5656);
   expect(result).toEqual({
     r: "028c0e3b4d2e7b0c1055c7d40e8df12676bc90cf19d0006225d500baecd5e11c",
     s: "0305fe1782f050839619c3e9627121bacd3a8dc87859e1ba5376fbd1b3bee4d4",
@@ -262,12 +262,12 @@ test("starkProvideQuantum", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
-  const result = await eth.starkProvideQuantum("e41d2489571d322189246dafa5ebde1f4699f498", new BigNumber(1));
+  const vap = new Vap(transport);
+  const result = await vap.starkProvideQuantum("e41d2489571d322189246dafa5ebde1f4699f498", new BigNumber(1));
   expect(result).toEqual(true);
 });
 
-test("starkDepositEth", async () => {
+test("starkDepositVap", async () => {
   const Transport = createTransportReplayer(
     RecordStore.fromString(`
     => f00800003400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001
@@ -277,9 +277,9 @@ test("starkDepositEth", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
-  await eth.starkProvideQuantum(null, new BigNumber(1))
-  const result = await eth.signTransaction(
+  const vap = new Vap(transport);
+  await vap.starkProvideQuantum(null, new BigNumber(1))
+  const result = await vap.signTransaction(
     "44'/60'/0'/0/0",
     "f86d018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000b844e2bbb15801142460171646987f20c714eda4b92812b22b811f56f27130937c267e29bd9e0000000000000000000000000000000000000000000000000000000000000001"
   );
@@ -304,11 +304,11 @@ test("starkDepositToken", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
+  const vap = new Vap(transport);
   const tokenInfo = byContractAddress("0xdac17f958d2ee523a2206206994597c13d831ec7");
-  await eth.provideERC20TokenInformation(tokenInfo);
-  await eth.starkProvideQuantum("0xdac17f958d2ee523a2206206994597c13d831ec7", new BigNumber(1));    
-  const result = await eth.signTransaction(
+  await vap.provideERC20TokenInformation(tokenInfo);
+  await vap.starkProvideQuantum("0xdac17f958d2ee523a2206206994597c13d831ec7", new BigNumber(1));    
+  const result = await vap.signTransaction(
     "44'/60'/0'/0/0",
     "f88d018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000b86400aeef8a02ce625e94458d39dd0bf3b45a843544dd4a14b8169045a3a3d15aa564b936c500000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000030d40"
   );
@@ -319,7 +319,7 @@ test("starkDepositToken", async () => {
   });
 });
 
-test("starkWithdrawEth", async () => {
+test("starkWithdrawVap", async () => {
   const Transport = createTransportReplayer(
     RecordStore.fromString(`
     => f00800003400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001
@@ -329,9 +329,9 @@ test("starkWithdrawEth", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
-  await eth.starkProvideQuantum(null, new BigNumber(1))
-  const result = await eth.signTransaction(
+  const vap = new Vap(transport);
+  await vap.starkProvideQuantum(null, new BigNumber(1))
+  const result = await vap.signTransaction(
     "44'/60'/0'/0/0",
     "f84c018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000a42e1a7d4d01142460171646987f20c714eda4b92812b22b811f56f27130937c267e29bd9e"
   );
@@ -354,11 +354,11 @@ test("starkWithdrawToken", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
+  const vap = new Vap(transport);
   const tokenInfo = byContractAddress("0xdac17f958d2ee523a2206206994597c13d831ec7");
-  await eth.provideERC20TokenInformation(tokenInfo);
-  await eth.starkProvideQuantum("0xdac17f958d2ee523a2206206994597c13d831ec7", new BigNumber(1));    
-  const result = await eth.signTransaction(
+  await vap.provideERC20TokenInformation(tokenInfo);
+  await vap.starkProvideQuantum("0xdac17f958d2ee523a2206206994597c13d831ec7", new BigNumber(1));    
+  const result = await vap.signTransaction(
     "44'/60'/0'/0/0",
     "f84c018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000a42e1a7d4d02ce625e94458d39dd0bf3b45a843544dd4a14b8169045a3a3d15aa564b936c5"
   );
@@ -379,9 +379,9 @@ test("starkDepositCancel", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
-  await eth.starkProvideQuantum(null, new BigNumber(1))
-  const result = await eth.signTransaction(
+  const vap = new Vap(transport);
+  await vap.starkProvideQuantum(null, new BigNumber(1))
+  const result = await vap.signTransaction(
     "44'/60'/0'/0/0",
     "f86d018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000b844c7fb117c01142460171646987f20c714eda4b92812b22b811f56f27130937c267e29bd9e0000000000000000000000000000000000000000000000000000000000000001"
   );
@@ -402,9 +402,9 @@ test("starkDepositReclaim", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
-  await eth.starkProvideQuantum(null, new BigNumber(1))
-  const result = await eth.signTransaction(
+  const vap = new Vap(transport);
+  await vap.starkProvideQuantum(null, new BigNumber(1))
+  const result = await vap.signTransaction(
     "44'/60'/0'/0/0",
     "f86d018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000b8444eab38f401142460171646987f20c714eda4b92812b22b811f56f27130937c267e29bd9e0000000000000000000000000000000000000000000000000000000000000001"
   );
@@ -423,8 +423,8 @@ test("starkFullWithdrawal", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
-  const result = await eth.signTransaction(
+  const vap = new Vap(transport);
+  const result = await vap.signTransaction(
     "44'/60'/0'/0/0",
     "f84c018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000a4276dd1de0000000000000000000000000000000000000000000000000000000000000001"
   );
@@ -443,8 +443,8 @@ test("starkFreeze", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
-  const result = await eth.signTransaction(
+  const vap = new Vap(transport);
+  const result = await vap.signTransaction(
     "44'/60'/0'/0/0",
     "f84c018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000a4b91072090000000000000000000000000000000000000000000000000000000000000001"
   );
@@ -455,7 +455,7 @@ test("starkFreeze", async () => {
   });
 });
 
-test("starkEscapeEth", async () => {
+test("starkEscapeVap", async () => {
   const Transport = createTransportReplayer(
     RecordStore.fromString(`
     => f00800003400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001
@@ -467,9 +467,9 @@ test("starkEscapeEth", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
-  await eth.starkProvideQuantum(null, new BigNumber(1))
-  const result = await eth.signTransaction(
+  const vap = new Vap(transport);
+  await vap.starkProvideQuantum(null, new BigNumber(1))
+  const result = await vap.signTransaction(
     "44'/60'/0'/0/0",
     "f8ad018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000b8849e3adac40000000000000000000000000000000000000000000000000000000000000001010101010101010101010101010101010101010101010101010101010101010101142460171646987f20c714eda4b92812b22b811f56f27130937c267e29bd9e00000000000000000000000000000000000000000000000000000000000186a0"
   );
@@ -494,11 +494,11 @@ test("starkEscapeTokens", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
+  const vap = new Vap(transport);
   const tokenInfo = byContractAddress("0xdac17f958d2ee523a2206206994597c13d831ec7");
-  await eth.provideERC20TokenInformation(tokenInfo);  
-  await eth.starkProvideQuantum("0xdac17f958d2ee523a2206206994597c13d831ec7", new BigNumber(1));    
-  const result = await eth.signTransaction(
+  await vap.provideERC20TokenInformation(tokenInfo);  
+  await vap.starkProvideQuantum("0xdac17f958d2ee523a2206206994597c13d831ec7", new BigNumber(1));    
+  const result = await vap.signTransaction(
     "44'/60'/0'/0/0",
     "f8ad018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000b8849e3adac40000000000000000000000000000000000000000000000000000000000000001010101010101010101010101010101010101010101010101010101010101010102ce625e94458d39dd0bf3b45a843544dd4a14b8169045a3a3d15aa564b936c50000000000000000000000000000000000000000000000000000000000030d40"
   );
@@ -519,8 +519,8 @@ test("starkEscapeVerify", async () => {
     `)
   );
   const transport = await Transport.open();
-  const eth = new Eth(transport);
-  const result = await eth.signTransaction(
+  const vap = new Vap(transport);
+  const result = await vap.signTransaction(
     "44'/60'/0'/0/0",
     "f88d018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000b8642dd5300602ce625e94458d39dd0bf3b45a843544dd4a14b8169045a3a3d15aa564b936c500000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000030d40"
   );

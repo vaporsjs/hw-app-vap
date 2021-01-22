@@ -1,18 +1,3 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _utils = require("./utils");
-
-var _errors = require("@ledgerhq/errors");
-
-var _bignumber = require("bignumber.js");
-
-var _rlp = require("rlp");
-
 /********************************************************************************
  *   Ledger Node JS API
  *   (c) 2016-2017 Ledger
@@ -30,6 +15,11 @@ var _rlp = require("rlp");
  *  limitations under the License.
  ********************************************************************************/
 // FIXME drop:
+import { splitPath, foreach } from "./utils";
+import { VapAppPleaseEnableContractData } from "@ledgerhq/errors";
+import { BigNumber } from "bignumber.js";
+import { encode, decode } from "rlp";
+
 function hexBuffer(str) {
   return Buffer.from(str.startsWith("0x") ? str.slice(2) : str, "hex");
 }
@@ -41,39 +31,39 @@ function maybeHexBuffer(str) {
 
 const remapTransactionRelatedErrors = e => {
   if (e && e.statusCode === 0x6a80) {
-    return new _errors.EthAppPleaseEnableContractData("Please enable Contract data on the Ethereum app Settings");
+    return new VapAppPleaseEnableContractData("Please enable Contract data on the Vapory app Settings");
   }
 
   return e;
 };
 /**
- * Ethereum API
+ * Vapory API
  *
  * @example
- * import Eth from "@ledgerhq/hw-app-eth";
- * const eth = new Eth(transport)
+ * import Vap from "@ledgerhq/hw-app-vap";
+ * const vap = new Vap(transport)
  */
 
 
-class Eth {
+export default class Vap {
   constructor(transport, scrambleKey = "w0w") {
     this.transport = void 0;
     this.transport = transport;
-    transport.decorateAppAPIMethods(this, ["getAddress", "provideERC20TokenInformation", "signTransaction", "signPersonalMessage", "getAppConfiguration", "starkGetPublicKey", "starkSignOrder", "starkSignTransfer", "starkProvideQuantum"], scrambleKey);
+    transport.decorateAppAPIMvapods(this, ["getAddress", "provideERC20TokenInformation", "signTransaction", "signPersonalMessage", "getAppConfiguration", "starkGetPublicKey", "starkSignOrder", "starkSignTransfer", "starkProvideQuantum"], scrambleKey);
   }
   /**
-   * get Ethereum address for a given BIP 32 path.
+   * get Vapory address for a given BIP 32 path.
    * @param path a path in BIP 32 format
    * @option boolDisplay optionally enable or not the display
    * @option boolChaincode optionally enable or not the chaincode request
    * @return an object with a publicKey, address and (optionally) chainCode
    * @example
-   * eth.getAddress("44'/60'/0'/0/0").then(o => o.address)
+   * vap.getAddress("44'/60'/0'/0/0").then(o => o.address)
    */
 
 
   getAddress(path, boolDisplay, boolChaincode) {
-    let paths = (0, _utils.splitPath)(path);
+    let paths = splitPath(path);
     let buffer = Buffer.alloc(1 + paths.length * 4);
     buffer[0] = paths.length;
     paths.forEach((element, index) => {
@@ -103,10 +93,10 @@ class Eth {
    * @param {*} info: a blob from "erc20.js" utilities that contains all token information.
    *
    * @example
-   * import { byContractAddress } from "@ledgerhq/hw-app-eth/erc20"
+   * import { byContractAddress } from "@ledgerhq/hw-app-vap/erc20"
    * const zrxInfo = byContractAddress("0xe41d2489571d322189246dafa5ebde1f4699f498")
-   * if (zrxInfo) await appEth.provideERC20TokenInformation(zrxInfo)
-   * const signed = await appEth.signTransaction(path, rawTxHex)
+   * if (zrxInfo) await appVap.provideERC20TokenInformation(zrxInfo)
+   * const signed = await appVap.signTransaction(path, rawTxHex)
    */
 
 
@@ -115,7 +105,7 @@ class Eth {
   }) {
     return this.transport.send(0xe0, 0x0a, 0x00, 0x00, data).then(() => true, e => {
       if (e && e.statusCode === 0x6d00) {
-        // this case happen for older version of ETH app, since older app version had the ERC20 data hardcoded, it's fine to assume it worked.
+        // this case happen for older version of VAP app, since older app version had the ERC20 data hardcoded, it's fine to assume it worked.
         // we return a flag to know if the call was effective or not
         return false;
       }
@@ -126,22 +116,22 @@ class Eth {
   /**
    * You can sign a transaction and retrieve v, r, s given the raw transaction and the BIP 32 path of the account to sign
    * @example
-   eth.signTransaction("44'/60'/0'/0/0", "e8018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a2487400080").then(result => ...)
+   vap.signTransaction("44'/60'/0'/0/0", "e8018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a2487400080").then(result => ...)
    */
 
 
   signTransaction(path, rawTxHex) {
-    let paths = (0, _utils.splitPath)(path);
+    let paths = splitPath(path);
     let offset = 0;
     let rawTx = Buffer.from(rawTxHex, "hex");
     let toSend = [];
     let response; // Check if the TX is encoded following EIP 155
 
-    let rlpTx = (0, _rlp.decode)(rawTx);
+    let rlpTx = decode(rawTx);
     let rlpOffset = 0;
 
     if (rlpTx.length > 6) {
-      let rlpVrs = (0, _rlp.encode)(rlpTx.slice(-3));
+      let rlpVrs = encode(rlpTx.slice(-3));
       rlpOffset = rawTx.length - (rlpVrs.length - 1);
     }
 
@@ -170,7 +160,7 @@ class Eth {
       offset += chunkSize;
     }
 
-    return (0, _utils.foreach)(toSend, (data, i) => this.transport.send(0xe0, 0x04, i === 0 ? 0x00 : 0x80, 0x00, data).then(apduResponse => {
+    return foreach(toSend, (data, i) => this.transport.send(0xe0, 0x04, i === 0 ? 0x00 : 0x80, 0x00, data).then(apduResponse => {
       response = apduResponse;
     })).then(() => {
       const v = response.slice(0, 1).toString("hex");
@@ -200,9 +190,9 @@ class Eth {
     });
   }
   /**
-  * You can sign a message according to eth_sign RPC call and retrieve v, r, s given the message and the BIP 32 path of the account to sign.
+  * You can sign a message according to vap_sign RPC call and retrieve v, r, s given the message and the BIP 32 path of the account to sign.
   * @example
-  eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).then(result => {
+  vap.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).then(result => {
   var v = result['v'] - 27;
   v = v.toString(16);
   if (v.length < 2) {
@@ -214,7 +204,7 @@ class Eth {
 
 
   signPersonalMessage(path, messageHex) {
-    let paths = (0, _utils.splitPath)(path);
+    let paths = splitPath(path);
     let offset = 0;
     let message = Buffer.from(messageHex, "hex");
     let toSend = [];
@@ -240,7 +230,7 @@ class Eth {
       offset += chunkSize;
     }
 
-    return (0, _utils.foreach)(toSend, (data, i) => this.transport.send(0xe0, 0x08, i === 0 ? 0x00 : 0x80, 0x00, data).then(apduResponse => {
+    return foreach(toSend, (data, i) => this.transport.send(0xe0, 0x08, i === 0 ? 0x00 : 0x80, 0x00, data).then(apduResponse => {
       response = apduResponse;
     })).then(() => {
       const v = response[0];
@@ -254,9 +244,9 @@ class Eth {
     });
   }
   /**
-  * Sign a prepared message following web3.eth.signTypedData specification. The host computes the domain separator and hashStruct(message)
+  * Sign a prepared message following web3.vap.signTypedData specification. The host computes the domain separator and hashStruct(message)
   * @example
-  eth.signEIP712HashedMessage("44'/60'/0'/0/0", Buffer.from("0101010101010101010101010101010101010101010101010101010101010101").toString("hex"), Buffer.from("0202020202020202020202020202020202020202020202020202020202020202").toString("hex")).then(result => {
+  vap.signEIP712HashedMessage("44'/60'/0'/0/0", Buffer.from("0101010101010101010101010101010101010101010101010101010101010101").toString("hex"), Buffer.from("0202020202020202020202020202020202020202020202020202020202020202").toString("hex")).then(result => {
   var v = result['v'] - 27;
   v = v.toString(16);
   if (v.length < 2) {
@@ -270,7 +260,7 @@ class Eth {
   signEIP712HashedMessage(path, domainSeparatorHex, hashStructMessageHex) {
     const domainSeparator = hexBuffer(domainSeparatorHex);
     const hashStruct = hexBuffer(hashStructMessageHex);
-    let paths = (0, _utils.splitPath)(path);
+    let paths = splitPath(path);
     let buffer = Buffer.alloc(1 + paths.length * 4 + 32 + 32, 0);
     let offset = 0;
     buffer[0] = paths.length;
@@ -301,7 +291,7 @@ class Eth {
 
 
   starkGetPublicKey(path, boolDisplay) {
-    let paths = (0, _utils.splitPath)(path);
+    let paths = splitPath(path);
     let buffer = Buffer.alloc(1 + paths.length * 4);
     buffer[0] = paths.length;
     paths.forEach((element, index) => {
@@ -314,9 +304,9 @@ class Eth {
   /**
    * sign a Stark order
    * @param path a path in BIP 32 format
-   * @option sourceTokenAddress contract address of the source token (not present for ETH)
+   * @option sourceTokenAddress contract address of the source token (not present for VAP)
    * @param sourceQuantization quantization used for the source token
-   * @option destinationTokenAddress contract address of the destination token (not present for ETH)
+   * @option destinationTokenAddress contract address of the destination token (not present for VAP)
    * @param destinationQuantization quantization used for the destination token
    * @param sourceVault ID of the source vault
    * @param destinationVault ID of the destination vault
@@ -331,7 +321,7 @@ class Eth {
   starkSignOrder(path, sourceTokenAddress, sourceQuantization, destinationTokenAddress, destinationQuantization, sourceVault, destinationVault, amountSell, amountBuy, nonce, timestamp) {
     const sourceTokenAddressHex = maybeHexBuffer(sourceTokenAddress);
     const destinationTokenAddressHex = maybeHexBuffer(destinationTokenAddress);
-    let paths = (0, _utils.splitPath)(path);
+    let paths = splitPath(path);
     let buffer = Buffer.alloc(1 + paths.length * 4 + 20 + 32 + 20 + 32 + 4 + 4 + 8 + 8 + 4 + 4, 0);
     let offset = 0;
     buffer[0] = paths.length;
@@ -378,7 +368,7 @@ class Eth {
   /**
    * sign a Stark transfer
    * @param path a path in BIP 32 format
-   * @option transferTokenAddress contract address of the token to be transferred (not present for ETH)
+   * @option transferTokenAddress contract address of the token to be transferred (not present for VAP)
    * @param transferQuantization quantization used for the token to be transferred
    * @param targetPublicKey target Stark public key
    * @param sourceVault ID of the source vault
@@ -393,7 +383,7 @@ class Eth {
   starkSignTransfer(path, transferTokenAddress, transferQuantization, targetPublicKey, sourceVault, destinationVault, amountTransfer, nonce, timestamp) {
     const transferTokenAddressHex = maybeHexBuffer(transferTokenAddress);
     const targetPublicKeyHex = hexBuffer(targetPublicKey);
-    let paths = (0, _utils.splitPath)(path);
+    let paths = splitPath(path);
     let buffer = Buffer.alloc(1 + paths.length * 4 + 20 + 32 + 32 + 4 + 4 + 8 + 4 + 4, 0);
     let offset = 0;
     buffer[0] = paths.length;
@@ -434,7 +424,7 @@ class Eth {
    *
    * It shall be run following a provideERC20TokenInformation call for the given contract
    *
-   * @param operationContract contract address of the token to be transferred (not present for ETH)
+   * @param operationContract contract address of the token to be transferred (not present for VAP)
    * @param operationQuantization quantization used for the token to be transferred
    */
 
@@ -450,7 +440,7 @@ class Eth {
     Buffer.from(operationQuantization.toString(16).padStart(64, "0"), "hex").copy(buffer, 20);
     return this.transport.send(0xf0, 0x08, 0x00, 0x00, buffer).then(() => true, e => {
       if (e && e.statusCode === 0x6d00) {
-        // this case happen for ETH application versions not supporting Stark extensions
+        // this case happen for VAP application versions not supporting Stark extensions
         return false;
       }
 
@@ -459,6 +449,4 @@ class Eth {
   }
 
 }
-
-exports.default = Eth;
-//# sourceMappingURL=Eth.js.map
+//# sourceMappingURL=Vap.js.map
